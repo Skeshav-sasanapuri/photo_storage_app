@@ -1,0 +1,379 @@
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Smart Photo Storage</title>-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            background-color: #343a40; /* Dark background */-->
+<!--            color: #ffffff; /* Light text */-->
+<!--        }-->
+<!--        .container {-->
+<!--            margin-top: 50px;-->
+<!--        }-->
+<!--        .search-box {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        .grid-view {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));-->
+<!--            gap: 15px;-->
+<!--        }-->
+<!--        .grid-item {-->
+<!--            background-color: #495057; /* Card background */-->
+<!--            padding: 10px;-->
+<!--            border: 1px solid #6c757d; /* Darker border */-->
+<!--            border-radius: 5px;-->
+<!--        }-->
+<!--        .btn-primary {-->
+<!--            background-color: #007bff; /* Primary button color */-->
+<!--            border-color: #007bff;-->
+<!--        }-->
+<!--        .btn-primary:hover {-->
+<!--            background-color: #0056b3; /* Darker on hover */-->
+<!--            border-color: #0056b3;-->
+<!--        }-->
+<!--        input[type="text"],-->
+<!--        input[type="date"],-->
+<!--        input[type="file"] {-->
+<!--            background-color: #495057; /* Dark input background */-->
+<!--            color: #ffffff; /* Light input text */-->
+<!--            border: 1px solid #6c757d; /* Input border */-->
+<!--        }-->
+<!--        input[type="text"]::placeholder,-->
+<!--        input[type="date"]::placeholder {-->
+<!--            color: #adb5bd; /* Light gray placeholder */-->
+<!--        }-->
+<!--        /* Center the file input button */-->
+<!--        .file-input-wrapper {-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            margin-top: 15px; /* Space above the file input */-->
+<!--        }-->
+<!--        .file-input {-->
+<!--            display: none; /* Hide the default input */-->
+<!--        }-->
+<!--        .custom-file-upload {-->
+<!--            display: inline-block;-->
+<!--            padding: 6px 12px;-->
+<!--            cursor: pointer;-->
+<!--            border: 1px solid #6c757d; /* Match border */-->
+<!--            border-radius: 5px;-->
+<!--            background-color: #495057; /* Match background */-->
+<!--            color: #ffffff; /* Light text color */-->
+<!--        }-->
+<!--        .custom-file-upload:hover {-->
+<!--            background-color: #6c757d; /* Darker on hover */-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div class="container">-->
+<!--        <h1 class="text-center">Smart Photo Storage</h1>-->
+<!--        <form id="searchForm" class="row" onsubmit="event.preventDefault(); fetchPhotos();">-->
+<!--            <div class="col-md-8">-->
+<!--                <div class="search-box">-->
+<!--                    <input type="text" id="searchTag" class="form-control" placeholder="Search by tags...">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-md-4">-->
+<!--                <input type="date" id="dateFilter" class="form-control" placeholder="Filter by date...">-->
+<!--            </div>-->
+<!--            <div class="col-md-12 text-right mb-3">-->
+<!--                <button type="submit" class="btn btn-primary">Search</button>-->
+<!--                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">Upload Photos</button>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--        <div id="photoGrid" class="grid-view"></div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Upload Modal &ndash;&gt;-->
+<!--    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">-->
+<!--        <div class="modal-dialog" role="document">-->
+<!--            <div class="modal-content bg-dark text-white">-->
+<!--                <div class="modal-header">-->
+<!--                    <h5 class="modal-title" id="uploadModalLabel">Upload Photos</h5>-->
+<!--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                        <span aria-hidden="true">&times;</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <div class="modal-body">-->
+<!--                    <div class="file-input-wrapper">-->
+<!--                        <label class="custom-file-upload">-->
+<!--                            <input type="file" id="photoInput" class="file-input" accept="image/*" multiple>-->
+<!--                            <span class="file-upload-label">Choose Files</span>-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="modal-footer">-->
+<!--                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+<!--                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+<!--    <script>-->
+<!--        $(document).ready(function() {-->
+<!--            // Function to fetch photos-->
+<!--            window.fetchPhotos = function() {-->
+<!--                const tag = $('#searchTag').val();-->
+<!--                const date = $('#dateFilter').val();-->
+<!--                $.get('http://127.0.0.1:5001/search', { tag, date })-->
+<!--                    .done(function(data) {-->
+<!--                        $('#photoGrid').empty(); // Clear the grid before adding new photos-->
+<!--                        if (data.length === 0) {-->
+<!--                            $('#photoGrid').append('<p class="text-center">No photos found.</p>');-->
+<!--                        } else {-->
+<!--                            data.forEach(photo => {-->
+<!--                                $('#photoGrid').append(`-->
+<!--                                    <div class="grid-item">-->
+<!--                                        <img src="/images/${encodeURIComponent(photo.filename)}" class="img-fluid" alt="${photo.filename}">-->
+<!--                                        <p>${photo.filename}</p>-->
+<!--                                        <p>Date Taken: ${photo.date_taken}</p>-->
+<!--                                    </div>-->
+<!--                                `);-->
+<!--                            });-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .fail(function(jqXHR, textStatus, errorThrown) {-->
+<!--                        console.error("Error fetching photos:", textStatus, errorThrown);-->
+<!--                    });-->
+<!--            }-->
+
+<!--            // Update file input label based on selected files-->
+<!--            $('#photoInput').on('change', function() {-->
+<!--                const fileInput = this;-->
+<!--                const fileCount = fileInput.files.length;-->
+<!--                const label = fileCount > 0 ? `${fileCount} file(s) selected` : 'Choose Files';-->
+<!--                $('.file-upload-label').text(label); // Update the label text-->
+<!--            });-->
+
+<!--            // Reset the label when the modal is closed-->
+<!--            $('#uploadModal').on('hidden.bs.modal', function() {-->
+<!--                $('#photoInput').val(''); // Clear the file input-->
+<!--                $('.file-upload-label').text('Choose Files'); // Reset the label text-->
+<!--            });-->
+
+<!--            // Upload button click handler-->
+<!--            $('#uploadButton').click(function() {-->
+<!--                const fileInput = document.getElementById('photoInput');-->
+<!--                const formData = new FormData();-->
+
+<!--                for (let i = 0; i < fileInput.files.length; i++) {-->
+<!--                    formData.append('files[]', fileInput.files[i]);-->
+<!--                }-->
+
+<!--                $.ajax({-->
+<!--                    url: 'http://127.0.0.1:5001/upload',  // Adjust the endpoint if necessary-->
+<!--                    type: 'POST',-->
+<!--                    data: formData,-->
+<!--                    processData: false,-->
+<!--                    contentType: false,-->
+<!--                    success: function(response) {-->
+<!--                        alert(response.message); // Show success message-->
+<!--                        $('#uploadModal').modal('hide');-->
+<!--                        fetchPhotos(); // Refresh the photo grid-->
+<!--                    }-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Photo Storage</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #343a40; /* Dark background */
+            color: #ffffff; /* Light text */
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .grid-item {
+            background-color: #495057; /* Card background */
+            padding: 10px;
+            border: 1px solid #6c757d; /* Darker border */
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker on hover */
+            border-color: #0056b3;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="file"] {
+            background-color: #495057; /* Dark input background */
+            color: #ffffff; /* Light input text */
+            border: 1px solid #6c757d; /* Input border */
+        }
+        input[type="text"]::placeholder,
+        input[type="date"]::placeholder {
+            color: #adb5bd; /* Light gray placeholder */
+        }
+        /* Center the file input button */
+        .file-input-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px; /* Space above the file input */
+        }
+        .file-input {
+            display: none; /* Hide the default input */
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            border: 1px solid #6c757d; /* Match border */
+            border-radius: 5px;
+            background-color: #495057; /* Match background */
+            color: #ffffff; /* Light text color */
+        }
+        .custom-file-upload:hover {
+            background-color: #6c757d; /* Darker on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Smart Photo Storage</h1>
+        <form id="searchForm" class="row" onsubmit="event.preventDefault(); fetchPhotos();">
+            <div class="col-md-8">
+                <div class="search-box">
+                    <input type="text" id="searchTag" class="form-control" placeholder="Search by tags...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <input type="date" id="dateFilter" class="form-control" placeholder="Filter by date...">
+            </div>
+            <div class="col-md-12 text-right mb-3">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">Upload Photos</button>
+            </div>
+        </form>
+        <div id="photoGrid" class="grid-view"></div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload Photos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="file-input-wrapper">
+                        <label class="custom-file-upload">
+                            <input type="file" id="photoInput" class="file-input" accept="image/*" multiple>
+                            <span class="file-upload-label">Choose Files</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to fetch photos
+            window.fetchPhotos = function() {
+                const tag = $('#searchTag').val();
+                const date = $('#dateFilter').val();
+                $.get('http://127.0.0.1:5001/search', { tag, date })
+                    .done(function(data) {
+                        $('#photoGrid').empty(); // Clear the grid before adding new photos
+                        if (!Array.isArray(data) || data.length === 0) {
+                            $('#photoGrid').append('<p class="text-center">No photos found.</p>');
+                        } else {
+                            data.forEach(photo => {
+                                $('#photoGrid').append(`
+                                    <div class="grid-item">
+                                        <img src="${photo.path}" class="img-fluid" alt="${photo.filename}"> <!-- Use the path from the server -->
+                                        <p>${photo.filename}</p>
+                                        <p>Date Taken: ${photo.date_taken}</p>
+                                    </div>
+                                `);
+                            });
+                        }
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error("Error fetching photos:", textStatus, errorThrown);
+                    });
+            }
+
+            // Update file input label based on selected files
+            $('#photoInput').on('change', function() {
+                const fileInput = this;
+                const fileCount = fileInput.files.length;
+                const label = fileCount > 0 ? `${fileCount} file(s) selected` : 'Choose Files';
+                $('.file-upload-label').text(label); // Update the label text
+            });
+
+            // Reset the label when the modal is closed
+            $('#uploadModal').on('hidden.bs.modal', function() {
+                $('#photoInput').val(''); // Clear the file input
+                $('.file-upload-label').text('Choose Files'); // Reset the label text
+            });
+
+            // Upload button click handler
+            $('#uploadButton').click(function() {
+                const fileInput = document.getElementById('photoInput');
+                const formData = new FormData();
+
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('files[]', fileInput.files[i]);
+                }
+
+                $.ajax({
+                    url: 'http://127.0.0.1:5001/upload',  // Adjust the endpoint if necessary
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        alert(response.message); // Show success message
+                        $('#uploadModal').modal('hide');
+                        fetchPhotos(); // Refresh the photo grid
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
